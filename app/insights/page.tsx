@@ -10,8 +10,9 @@ export default function InsightsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <img src="/Logo.png" alt="PropIntelli" className="h-12 w-auto" />
-              <h1 className="ml-3 text-xl font-semibold text-gray-900">PropIntelli</h1>
+              <Link href="/home">
+                <img src="/Logo.png" alt="PropIntelli" className="h-12 w-auto" />
+              </Link>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
               <Link href="/home" className="text-gray-700 hover:text-blue-600 font-medium">Home</Link>
