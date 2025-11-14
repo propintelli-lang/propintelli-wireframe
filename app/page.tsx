@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { fetchProperties } from '../lib/api';
 
 const COUNTRY_OPTIONS = [
@@ -84,15 +85,15 @@ export default function Home() {
               <h1 className="ml-3 text-xl font-semibold text-gray-900">PropIntelli</h1>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="/" className="text-gray-700 hover:text-blue-600 font-medium">Home</a>
-              <a href="/" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">Properties</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Neighborhood Insights</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Analytics</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">About Us</a>
+              <Link href="/home" className="text-gray-700 hover:text-blue-600 font-medium">Home</Link>
+              <Link href="/" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">Properties</Link>
+              <Link href="/insights" className="text-gray-700 hover:text-blue-600 font-medium">Neighborhood Insights</Link>
+              <Link href="/analytics" className="text-gray-700 hover:text-blue-600 font-medium">Analytics</Link>
+              <Link href="#" className="text-gray-700 hover:text-blue-600 font-medium">About Us</Link>
             </nav>
             <div className="flex items-center space-x-4">
-              <a href="#" className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium">Get Started</a>
-              <a href="#" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Login / Register</a>
+              <Link href="/onboarding" className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium">Get Started</Link>
+              <Link href="/auth" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Login / Register</Link>
             </div>
           </div>
         </div>
