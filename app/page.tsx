@@ -75,7 +75,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header with Navigation */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -83,8 +83,16 @@ export default function Home() {
               <img src="/Logo.png" alt="PropIntelli" className="h-12 w-auto" />
               <h1 className="ml-3 text-xl font-semibold text-gray-900">PropIntelli</h1>
             </div>
-            <div className="text-sm text-gray-500">
-              Connected to: {process.env.NEXT_PUBLIC_API_BASE_URL || 'API not configured'}
+            <nav className="hidden md:flex items-center space-x-6">
+              <a href="/" className="text-gray-700 hover:text-blue-600 font-medium">Home</a>
+              <a href="/" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">Properties</a>
+              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Neighborhood Insights</a>
+              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Analytics</a>
+              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">About Us</a>
+            </nav>
+            <div className="flex items-center space-x-4">
+              <a href="#" className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium">Get Started</a>
+              <a href="#" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Login / Register</a>
             </div>
           </div>
         </div>
