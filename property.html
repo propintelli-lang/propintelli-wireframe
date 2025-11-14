@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PropIntelli - Property Detail</title>
+	<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+	<header class="header">
+		<div class="container header-inner">
+			<div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><img src="Logo.png" alt="PropIntelli" /></a></div>
+			<nav class="nav">
+				<a href="index.html">Home</a>
+				<a href="search.html">Properties</a>
+				<a href="insights.html">Neighborhood Insights</a>
+				<a href="#">About Us</a>
+			</nav>
+			<div class="spacer"></div>
+			<div class="auth-buttons">
+				<a class="button" href="auth.html">Login</a>
+			</div>
+		</div>
+	</header>
+
+	<main class="main">
+		<div class="container stack">
+			<div class="carousel">Image Carousel Placeholder</div>
+			<div class="two-col">
+				<section class="stack">
+					<div class="card">
+						<h3>Property Details</h3>
+						<p><strong>$580,000</strong> • 95 m² • 3 rooms • 2 bathrooms</p>
+						<p>Bright, renovated apartment with balcony.</p>
+						<div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap:8px;">
+							<div class="placeholder" style="height:80px;">Feature</div>
+							<div class="placeholder" style="height:80px;">Feature</div>
+							<div class="placeholder" style="height:80px;">Feature</div>
+						</div>
+						<div class="placeholder" style="height:220px;">Map Placeholder</div>
+					</div>
+					<div class="card"><h3>Property History</h3><div class="placeholder">Sales/Rent history</div></div>
+					<div class="card"><h3>Property Analytics</h3>
+						<div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+							<div class="placeholder">Price / sqm</div>
+							<div class="placeholder">Local trend</div>
+							<div class="placeholder">Renovation estimate</div>
+						</div>
+					</div>
+					<div class="card"><h3>Contact</h3>
+						<div class="stack">
+							<input class="input" placeholder="Your name" />
+							<input class="input" placeholder="Email" />
+							<textarea class="input" placeholder="Message" style="min-height:100px;"></textarea>
+							<div style="display:flex; gap:8px;">
+								<button class="button primary">Send</button>
+								<button class="button" data-open-chat>Chat with us</button>
+							</div>
+						</div>
+					</div>
+				</section>
+				<aside class="stack">
+					<div class="card"><h3>AI Price Estimate</h3><div class="placeholder">Zestimate-like estimate</div></div>
+					<div class="card"><h3>Nearby Amenities</h3><div class="placeholder">Schools • Pharmacies • Hospitals</div></div>
+					<div class="card"><h3>Neighborhood Insights</h3><div class="placeholder">Crime, Demographics, Prices, Facilities</div></div>
+				</aside>
+			</div>
+			<section class="stack">
+				<div class="card"><h3>Similar Properties</h3>
+					<div class="grid cols-4">
+						<div class="placeholder">Card</div>
+						<div class="placeholder">Card</div>
+						<div class="placeholder">Card</div>
+						<div class="placeholder">Card</div>
+					</div>
+				</div>
+			</section>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="container">© 2025 PropIntelli</div>
+	</footer>
+
+	<button class="chatbot-toggle">Chat</button>
+	<div class="chatbot">
+		<div class="chatbot-header">PropIntelli Assistant</div>
+		<div class="chatbot-body">
+			<div class="small">Need details or comps? Ask me anything.</div>
+		</div>
+		<div class="chatbot-input">
+			<input class="input" placeholder="Type your question..." />
+			<button class="button primary">Send</button>
+		</div>
+	</div>
+
+	<script src="app.js"></script>
+</body>
+</html>

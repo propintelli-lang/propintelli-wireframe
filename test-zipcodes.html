@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Zipcodes</title>
+</head>
+<body>
+    <h1>Zipcodes Test</h1>
+    <button onclick="testLoad()">Test Load zipcodes.json</button>
+    <div id="result"></div>
+
+    <script>
+        async function testLoad() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Loading...';
+            
+            try {
+                console.log('Fetching zipcodes.json...');
+                const response = await fetch('zipcodes.json');
+                console.log('Response:', response.status, response.ok);
+                
+                if (!response.ok) {
+                    throw new Error('Failed: ' + response.status);
+                }
+                
+                const data = await response.json();
+                console.log('Data loaded:', data);
+                console.log('Has cityToZips:', !!data.cityToZips);
+                console.log('Has malaga:', 'malaga' in data.cityToZips);
+                
+                if ('malaga' in data.cityToZips) {
+                    const malagaZips = data.cityToZips['malaga'];
+                    resultDiv.innerHTML = `
+                        <h2 style="color: green;">✅ SUCCESS!</h2>
+                        <p>File loaded successfully!</p>
+                        <p>Malaga zip codes: ${malagaZips.join(', ')}</p>
+                        <p>Total: ${malagaZips.length} zip codes</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<h2 style="color: red;">❌ Malaga not found in data!</h2>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<h2 style="color: red;">❌ ERROR: ${error.message}</h2>`;
+            }
+        }
+    </script>
+</body>
+</html>
+

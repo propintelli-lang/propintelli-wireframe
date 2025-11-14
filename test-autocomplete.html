@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autocomplete Test</title>
+    <style>
+        .location-autocomplete { position: relative; }
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 2px;
+            width: 100%;
+        }
+        .autocomplete-suggestion {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .autocomplete-suggestion:hover {
+            background: #f8f9fa;
+        }
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Autocomplete Test</h1>
+    
+    <div class="location-autocomplete">
+        <input id="locationInput" placeholder="Type a city name..." autocomplete="off" />
+        <div id="locationSuggestions" class="autocomplete-suggestions"></div>
+    </div>
+    
+    <select id="countrySelect">
+        <option value="">Select Country</option>
+        <option value="DE">Germany</option>
+        <option value="FR">France</option>
+    </select>
+
+    <script>
+        console.log('Test page loaded');
+        
+        const locationInput = document.getElementById('locationInput');
+        const locationSuggestions = document.getElementById('locationSuggestions');
+        const countrySelect = document.getElementById('countrySelect');
+        
+        console.log('Elements found:', {
+            locationInput: !!locationInput,
+            locationSuggestions: !!locationSuggestions,
+            countrySelect: !!countrySelect
+        });
+
+        const locationData = {
+            'DE': [
+                { name: 'Berlin', type: 'City', region: 'Berlin', zip: '10115' },
+                { name: 'Munich', type: 'City', region: 'Bavaria', zip: '80331' },
+                { name: 'Hamburg', type: 'City', region: 'Hamburg', zip: '20095' }
+            ],
+            'FR': [
+                { name: 'Paris', type: 'City', region: 'Île-de-France', zip: '75001' },
+                { name: 'Lyon', type: 'City', region: 'Auvergne-Rhône-Alpes', zip: '69001' },
+                { name: 'Marseille', type: 'City', region: 'Provence-Alpes-Côte d\'Azur', zip: '13001' }
+            ]
+        };
+
+        function getSuggestions(query, country) {
+            console.log('getSuggestions called with:', { query, country });
+            
+            if (!query || query.length < 2 || !country || !locationData[country]) {
+                return [];
+            }
+
+            const countryLocations = locationData[country];
+            const lowerQuery = query.toLowerCase();
+            
+            return countryLocations.filter(location => 
+                location.name.toLowerCase().includes(lowerQuery) ||
+                location.region.toLowerCase().includes(lowerQuery) ||
+                location.zip.includes(query)
+            ).slice(0, 8);
+        }
+
+        function renderSuggestions(suggestions) {
+            console.log('renderSuggestions called with:', suggestions);
+            
+            if (suggestions.length === 0) {
+                locationSuggestions.style.display = 'none';
+                return;
+            }
+
+            locationSuggestions.innerHTML = suggestions.map((suggestion, index) => `
+                <div class="autocomplete-suggestion" data-index="${index}">
+                    <div>${suggestion.name} - ${suggestion.region} (${suggestion.zip})</div>
+                </div>
+            `).join('');
+
+            locationSuggestions.style.display = 'block';
+        }
+
+        if (locationInput) {
+            locationInput.addEventListener('input', function() {
+                const query = this.value;
+                const country = countrySelect.value;
+                
+                console.log('Input event:', { query, country });
+                
+                const suggestions = getSuggestions(query, country);
+                renderSuggestions(suggestions);
+            });
+        }
+
+        if (locationSuggestions) {
+            locationSuggestions.addEventListener('click', function(e) {
+                const suggestion = e.target.closest('.autocomplete-suggestion');
+                if (suggestion) {
+                    const index = parseInt(suggestion.dataset.index);
+                    const country = countrySelect.value;
+                    const suggestions = getSuggestions(locationInput.value, country);
+                    if (suggestions[index]) {
+                        locationInput.value = suggestions[index].name;
+                        locationSuggestions.style.display = 'none';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+

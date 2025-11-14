@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Test</title>
+</head>
+<body>
+    <h1>Server Test</h1>
+    <p>If you can see this page, your server is working!</p>
+    <p>Current URL: <span id="url"></span></p>
+    <p>Protocol: <span id="protocol"></span></p>
+    <button onclick="testFetch()">Test Fetch zipcodes.json</button>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('url').textContent = window.location.href;
+        document.getElementById('protocol').textContent = window.location.protocol;
+
+        async function testFetch() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('zipcodes.json');
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <h3 style="color: green;">✅ SUCCESS!</h3>
+                        <p>File loaded successfully!</p>
+                        <p>Total zip codes: ${Object.keys(data.zipToCities || {}).length}</p>
+                        <p>Total cities: ${data.cities?.length || 0}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3 style="color: red;">❌ ERROR</h3>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">❌ ERROR</h3>
+                    <p>${error.message}</p>
+                    <p>This usually means you're not using a local server.</p>
+                `;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+

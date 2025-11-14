@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PropIntelli - Dashboard</title>
+	<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+	<header class="header">
+		<div class="container header-inner">
+			<div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><img src="Logo.png" alt="PropIntelli" /></a></div>
+			<nav class="nav">
+				<a href="index.html">Home</a>
+				<a href="search.html">Properties</a>
+				<a href="insights.html">Neighborhood Insights</a>
+				<a href="analytics.html">Analytics</a>
+			</nav>
+			<div class="spacer"></div>
+			<div class="auth-buttons">
+				<div class="button">Profile ▾</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="main">
+		<div class="container stack">
+			<div class="grid cols-4">
+				<div class="card"><h3>Favorites</h3><div class="placeholder">Saved properties</div></div>
+				<div class="card"><h3>Compare Sets</h3><div class="placeholder">Pairs or groups to revisit</div></div>
+				<div class="card"><h3>Recommendations</h3><div class="placeholder">Based on your activity</div></div>
+				<div class="card"><h3>Notifications</h3><div class="placeholder">New listings • Price changes</div></div>
+			</div>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="container">© 2025 PropIntelli</div>
+	</footer>
+
+	<button class="chatbot-toggle">Chat</button>
+	<div class="chatbot">
+		<div class="chatbot-header">PropIntelli Assistant</div>
+		<div class="chatbot-body">
+			<div class="small">Get updates and recommendations via chat.</div>
+		</div>
+		<div class="chatbot-input">
+			<input class="input" placeholder="Ask for recommendations..." />
+			<button class="button primary">Send</button>
+		</div>
+	</div>
+
+	<script src="app.js"></script>
+</body>
+</html>

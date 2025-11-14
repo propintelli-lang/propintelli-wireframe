@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PropIntelli - Home</title>
+	<link rel="stylesheet" href="styles.css?v=2" />
+</head>
+<body>
+	<header class="header">
+		<div class="container header-inner">
+			<div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><img src="Logo.png" alt="PropIntelli" /></a></div>
+			<nav class="nav">
+				<a href="index.html">Home</a>
+				<a href="search.html">Properties</a>
+				<a href="insights.html">Neighborhood Insights</a>
+				<a href="analytics.html">Analytics</a>
+				<a href="#">About Us</a>
+			</nav>
+			<div class="spacer"></div>
+			<div class="auth-buttons">
+				<a class="button" href="onboarding.html">Get Started</a>
+				<a class="button" href="auth.html">Login / Register</a>
+			</div>
+		</div>
+	</header>
+
+	<section class="hero">
+		<div class="hero-overlay"></div>
+		<div class="container hero-content">
+			<h1>Analyze neighborhoods before you buy</h1>
+			<p class="sub">Make smarter decisions with data-driven insights.</p>
+			<div class="search-bar">
+				<div class="location-autocomplete">
+					<input id="locationInput" placeholder="Province, City or Zip Code" autocomplete="off" />
+					<div id="locationSuggestions" class="autocomplete-suggestions"></div>
+				</div>
+				<select id="countrySelect">
+					<option value="">Location</option>
+					<option value="DE">Germany</option>
+					<option value="AT">Austria</option>
+					<option value="CH">Switzerland</option>
+					<option value="FR">France</option>
+					<option value="ES">Spain</option>
+					<option value="IT">Italy</option>
+					<option value="PT">Portugal</option>
+					<option value="NL">Netherlands</option>
+					<option value="PL">Poland</option>
+					<option value="HU">Hungary</option>
+					<option value="CZ">Czech Republic</option>
+				</select>
+				<select>
+					<option value="buy" selected>Buy</option>
+					<option value="rent">Rent</option>
+					<option value="evaluate">Evaluate</option>
+				</select>
+				<a class="button primary" id="searchButton" href="search.html">Start Your Search</a>
+			</div>
+		</div>
+	</section>
+
+	<main class="main">
+		<div class="container stack">
+			<section class="stack">
+				<h2 style="margin:0;">Featured Properties</h2>
+				<div class="grid cols-4">
+					<div class="property-card"><div class="property-thumb"></div><div><strong>$520,000</strong><div class="property-meta"><span>90 m² • 3 rm</span><span>Central</span></div></div></div>
+					<div class="property-card"><div class="property-thumb"></div><div><strong>$750,000</strong><div class="property-meta"><span>120 m² • 4 rm</span><span>Parkside</span></div></div></div>
+					<div class="property-card"><div class="property-thumb"></div><div><strong>$410,000</strong><div class="property-meta"><span>78 m² • 2 rm</span><span>Riverside</span></div></div></div>
+					<div class="property-card"><div class="property-thumb"></div><div><strong>$660,000</strong><div class="property-meta"><span>110 m² • 3 rm</span><span>Old Town</span></div></div></div>
+				</div>
+			</section>
+			<section class="stack">
+				<h2 style="margin:0;">Recommended for You</h2>
+				<div class="grid cols-4">
+					<div class="placeholder">Recommendation</div>
+					<div class="placeholder">Recommendation</div>
+					<div class="placeholder">Recommendation</div>
+					<div class="placeholder">Recommendation</div>
+				</div>
+			</section>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="container">© 2025 PropIntelli</div>
+	</footer>
+
+	<button class="chatbot-toggle">Chat</button>
+	<div class="chatbot">
+		<div class="chatbot-header">PropIntelli Assistant</div>
+		<div class="chatbot-body">
+			<div class="small">Hi! Ask me about prices, neighborhoods, or listings.</div>
+		</div>
+		<div class="chatbot-input">
+			<input class="input" placeholder="Type your question..." />
+			<button class="button primary">Send</button>
+		</div>
+	</div>
+
+	<script src="app-simple.js?v=3"></script>
+</body>
+</html>

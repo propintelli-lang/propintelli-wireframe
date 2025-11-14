@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PropIntelli - Get Started</title>
+	<link rel="stylesheet" href="styles.css" />
+	<style>
+		/* Mobile UX Improvements */
+		@media (max-width: 768px) {
+			/* Increase label font size for mobile */
+			.question label {
+				font-size: 16px !important;
+			}
+			
+			/* Ensure buttons and selection areas are at least 44x44px */
+			.button {
+				min-height: 44px;
+				padding: 12px 16px !important;
+			}
+			
+			.purpose-option {
+				min-height: 44px;
+				padding: 14px 12px !important;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			
+			/* Add padding-bottom between grouped buttons (16px) */
+			.purpose-options {
+				gap: 16px !important;
+			}
+			
+			.purpose-option:not(:last-child) {
+				margin-bottom: 0;
+			}
+			
+			/* Ensure input fields are touch-friendly */
+			.question input[type="number"],
+			.question input[type="range"] {
+				min-height: 44px;
+				font-size: 16px; /* Prevents zoom on iOS */
+			}
+			
+			/* Ensure toggle buttons are touch-friendly */
+			.toggle-filters-btn,
+			#toggleSummary {
+				min-height: 44px;
+				padding: 12px 16px !important;
+			}
+			
+			/* Improve spacing for range inputs */
+			.range-input {
+				gap: 12px;
+			}
+			
+			.range-input input {
+				min-height: 44px;
+				font-size: 16px; /* Prevents zoom on iOS */
+			}
+			
+			/* Ensure slider container is touch-friendly */
+			.slider-container {
+				padding: 8px 0;
+			}
+			
+			.slider {
+				height: 8px;
+			}
+			
+			.slider::-webkit-slider-thumb {
+				width: 24px;
+				height: 24px;
+			}
+			
+			.slider::-moz-range-thumb {
+				width: 24px;
+				height: 24px;
+			}
+		}
+		
+		/* General improvements for all screen sizes */
+		.purpose-options {
+			gap: 16px;
+		}
+		
+		.purpose-option {
+			min-height: 44px;
+			padding: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		
+		.button {
+			min-height: 44px;
+		}
+	</style>
+</head>
+<body>
+	<header class="header">
+		<div class="container header-inner">
+			<div class="logo"><img src="Logo.png" alt="PropIntelli" /></div>
+			<div class="spacer"></div>
+			<div class="auth-buttons">
+				<a class="button" href="auth.html">Login</a>
+			</div>
+		</div>
+	</header>
+
+	<main class="onboarding">
+		<div class="onboarding-box">
+			<h2>Let's find your perfect property</h2>
+			<p class="sub">Tell us about your preferences to get personalized recommendations</p>
+			
+			<form>
+				<div class="question">
+					<label>1. Area of the property - specify the range in how many kms</label>
+					<div class="range-input">
+						<input type="number" id="areaMin" placeholder="Min" value="1" />
+						<span>to</span>
+						<input type="number" id="areaMax" placeholder="Max" value="10" />
+					</div>
+				</div>
+
+				<div class="question">
+					<label>2. What is your budget?</label>
+					<div class="range-input">
+						<input type="number" id="budgetMin" placeholder="Min €" value="200000" />
+						<span>to</span>
+						<input type="number" id="budgetMax" placeholder="Max €" value="500000" />
+					</div>
+				</div>
+
+				<div class="question">
+					<label>3. Who will live there?</label>
+					<div class="purpose-options" id="occupancyOptions">
+						<div class="purpose-option" data-occupancy="single">Single</div>
+						<div class="purpose-option" data-occupancy="couple">Couple</div>
+						<div class="purpose-option selected" data-occupancy="family">Family with kids</div>
+						<div class="purpose-option" data-occupancy="roommates">Roommates</div>
+					</div>
+				</div>
+
+				<div class="question">
+					<label>4. Size</label>
+					<div class="slider-container">
+						<input type="range" id="sizeSlider" class="slider" min="30" max="200" value="90" />
+						<div id="sizeValue" class="slider-value">90 m²</div>
+					</div>
+				</div>
+
+				<div class="question">
+					<label>5. Tell me about purpose</label>
+					<div class="purpose-options" id="purposeOptions">
+						<div class="purpose-option selected" data-purpose="family-home">Family home</div>
+						<div class="purpose-option" data-purpose="investment">Investment / Flipper</div>
+						<div class="purpose-option" data-purpose="rental">To rent it out</div>
+						<div class="purpose-option" data-purpose="vacation">Vacation home</div>
+					</div>
+					<div id="purposeTags" class="purpose-tags" style="margin-top: 12px; padding: 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; display: none;">
+						<div id="purposeTagContent"></div>
+					</div>
+				</div>
+
+				<!-- Optional Filters Section (Collapsed by Default) -->
+				<div class="optional-filters" style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+					<button type="button" id="toggleOptionalFilters" class="toggle-filters-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: #374151;">
+						<span>🔍 Optional Filters</span>
+						<span id="optionalFiltersIcon" style="font-size: 12px; color: #6b7280;">▶</span>
+					</button>
+					<div id="optionalFiltersContent" style="display: none; margin-top: 16px; padding: 16px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px;">
+						<div style="display: grid; gap: 20px;">
+							<!-- Rooms -->
+							<div class="question">
+								<label style="font-size: 13px; color: #6b7280;">Number of Rooms</label>
+								<div class="range-input">
+									<input type="number" id="roomsMin" placeholder="Min" min="1" max="10" />
+									<span>to</span>
+									<input type="number" id="roomsMax" placeholder="Max" min="1" max="10" />
+								</div>
+							</div>
+
+							<!-- Bathrooms -->
+							<div class="question">
+								<label style="font-size: 13px; color: #6b7280;">Number of Bathrooms</label>
+								<div class="range-input">
+									<input type="number" id="bathroomsMin" placeholder="Min" min="1" max="10" />
+									<span>to</span>
+									<input type="number" id="bathroomsMax" placeholder="Max" min="1" max="10" />
+								</div>
+							</div>
+
+							<!-- Property Type -->
+							<div class="question">
+								<label style="font-size: 13px; color: #6b7280;">Property Type</label>
+								<div class="purpose-options" style="grid-template-columns: repeat(2, 1fr);">
+									<div class="purpose-option optional-filter-option" data-filter="type" data-value="apartment">Apartment</div>
+									<div class="purpose-option optional-filter-option" data-filter="type" data-value="house">House</div>
+									<div class="purpose-option optional-filter-option" data-filter="type" data-value="condo">Condo</div>
+									<div class="purpose-option optional-filter-option" data-filter="type" data-value="townhouse">Townhouse</div>
+								</div>
+							</div>
+
+							<!-- Condition -->
+							<div class="question">
+								<label style="font-size: 13px; color: #6b7280;">Condition</label>
+								<div class="purpose-options" style="grid-template-columns: repeat(2, 1fr);">
+									<div class="purpose-option optional-filter-option" data-filter="condition" data-value="new_build">New build</div>
+									<div class="purpose-option optional-filter-option" data-filter="condition" data-value="fully_renovated">Fully renovated</div>
+									<div class="purpose-option optional-filter-option" data-filter="condition" data-value="move_in_ready">Move-in ready</div>
+									<div class="purpose-option optional-filter-option" data-filter="condition" data-value="cosmetic_refresh">Needs cosmetic work</div>
+								</div>
+							</div>
+
+							<!-- Features/Amenities -->
+							<div class="question">
+								<label style="font-size: 13px; color: #6b7280;">Features & Amenities</label>
+								<div class="purpose-options" style="grid-template-columns: repeat(2, 1fr);">
+									<div class="purpose-option optional-filter-option" data-filter="feature" data-value="parking">🅿️ Parking</div>
+									<div class="purpose-option optional-filter-option" data-filter="feature" data-value="balcony">🌳 Balcony</div>
+									<div class="purpose-option optional-filter-option" data-filter="feature" data-value="garden">🌿 Garden</div>
+									<div class="purpose-option optional-filter-option" data-filter="feature" data-value="elevator">🛗 Elevator</div>
+									<div class="purpose-option optional-filter-option" data-filter="feature" data-value="pool">🏊 Pool</div>
+									<div class="purpose-option optional-filter-option" data-filter="feature" data-value="air_conditioning">❄️ Air Conditioning</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Summary Confirmation Card -->
+				<div id="summaryCard" class="summary-card" style="margin-top: 24px; padding: 16px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 12px; display: none;">
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+						<h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #333;">📋 Summary</h3>
+						<button type="button" id="toggleSummary" style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 14px; padding: 4px 8px;">▼</button>
+					</div>
+					<div id="summaryContent" style="display: grid; gap: 8px; font-size: 14px; color: #4b5563;">
+						<div id="summaryArea" style="display: flex; justify-content: space-between;">
+							<span style="font-weight: 500;">Area:</span>
+							<span id="summaryAreaValue">1-10 km</span>
+						</div>
+						<div id="summaryBudget" style="display: flex; justify-content: space-between;">
+							<span style="font-weight: 500;">Budget:</span>
+							<span id="summaryBudgetValue">€200,000 - €500,000</span>
+						</div>
+						<div id="summaryOccupancy" style="display: flex; justify-content: space-between;">
+							<span style="font-weight: 500;">Occupancy:</span>
+							<span id="summaryOccupancyValue">Family with kids</span>
+						</div>
+						<div id="summarySize" style="display: flex; justify-content: space-between;">
+							<span style="font-weight: 500;">Size:</span>
+							<span id="summarySizeValue">90 m²</span>
+						</div>
+						<div id="summaryPurpose" style="display: flex; justify-content: space-between;">
+							<span style="font-weight: 500;">Purpose:</span>
+							<span id="summaryPurposeValue">Family home</span>
+						</div>
+					</div>
+				</div>
+
+				<div style="display: flex; gap: 12px; margin-top: 20px;">
+					<button type="button" class="button" onclick="window.location.href='index.html'">Skip for now</button>
+					<button type="submit" class="button primary">Get My Recommendations</button>
+				</div>
+			</form>
+		</div>
+	</main>
+
+	<script src="app.js"></script>
+	<script>
+		// Occupancy to size mapping
+		const occupancySizeMap = {
+			'single': 45,      // ~40-50 m²
+			'couple': 65,      // ~60-70 m²
+			'family': 90,      // ~80-100 m²
+			'roommates': 120   // ~100+ m²
+		};
+
+		// Get DOM elements
+		const sizeSlider = document.getElementById('sizeSlider');
+		const sizeValue = document.getElementById('sizeValue');
+		const occupancyOptions = document.querySelectorAll('#occupancyOptions .purpose-option');
+
+		// Update size display
+		function updateSizeDisplay(value) {
+			sizeValue.textContent = value + ' m²';
+		}
+
+		// Handle occupancy selection
+		occupancyOptions.forEach(option => {
+			option.addEventListener('click', function() {
+				// Remove selected class from all options
+				occupancyOptions.forEach(opt => opt.classList.remove('selected'));
+				// Add selected class to clicked option
+				this.classList.add('selected');
+				
+				// Get occupancy type
+				const occupancy = this.getAttribute('data-occupancy');
+				
+				// Pre-fill size slider based on occupancy
+				if (occupancySizeMap[occupancy]) {
+					const suggestedSize = occupancySizeMap[occupancy];
+					sizeSlider.value = suggestedSize;
+					updateSizeDisplay(suggestedSize);
+				}
+				
+				// Update summary (will be defined later, but we'll call it via setTimeout)
+				if (typeof updateSummary === 'function') {
+					setTimeout(updateSummary, 10);
+				}
+			});
+		});
+
+		// Handle size slider changes (keep it editable)
+		sizeSlider.addEventListener('input', function() {
+			updateSizeDisplay(this.value);
+		});
+
+		// Purpose-specific tags and descriptions
+		const purposeTags = {
+			'family-home': {
+				tags: ['🏠 Long-term residence', '👨‍👩‍👧‍👦 Family-friendly', '📍 Good schools nearby'],
+				description: 'We\'ll prioritize properties with family amenities, good schools, and safe neighborhoods.'
+			},
+			'investment': {
+				tags: ['💰 ROI potential', '📈 Market trends', '🔧 Renovation opportunities'],
+				description: 'We\'ll focus on properties with strong investment potential, good ROI, and renovation opportunities.'
+			},
+			'rental': {
+				tags: ['💵 Rental yield', '📊 Market demand', '🏘️ Tenant-friendly'],
+				description: 'We\'ll highlight properties with strong rental potential and high demand areas.'
+			},
+			'vacation': {
+				tags: ['🏖️ Vacation rental', '🌴 Tourist areas', '📅 Seasonal demand'],
+				description: 'We\'ll prioritize properties in popular vacation destinations with rental income potential.'
+			}
+		};
+
+		// Handle purpose options (for the purpose section)
+		const purposeOptions = document.querySelectorAll('#purposeOptions .purpose-option');
+		const purposeTagsContainer = document.getElementById('purposeTags');
+		const purposeTagContent = document.getElementById('purposeTagContent');
+
+		function updatePurposeTags(purpose) {
+			if (purposeTags[purpose]) {
+				const data = purposeTags[purpose];
+				
+				// Build tags HTML
+				const tagsHTML = data.tags.map(tag => 
+					`<span class="purpose-tag" style="display: inline-block; padding: 4px 10px; margin: 4px 4px 4px 0; background: #fff; border: 1px solid #7dd3fc; border-radius: 12px; font-size: 12px; color: #0369a1;">${tag}</span>`
+				).join('');
+				
+				// Build full content
+				const contentHTML = `
+					<div style="font-size: 13px; color: #0369a1; margin-bottom: 8px; font-weight: 500;">${data.description}</div>
+					<div style="display: flex; flex-wrap: wrap; gap: 4px;">
+						${tagsHTML}
+					</div>
+				`;
+				
+				purposeTagContent.innerHTML = contentHTML;
+				purposeTagsContainer.style.display = 'block';
+			} else {
+				purposeTagsContainer.style.display = 'none';
+			}
+		}
+
+		// Initialize with default selected purpose
+		const defaultPurpose = document.querySelector('#purposeOptions .purpose-option.selected');
+		if (defaultPurpose) {
+			updatePurposeTags(defaultPurpose.getAttribute('data-purpose'));
+		}
+
+		purposeOptions.forEach(option => {
+			option.addEventListener('click', function() {
+				purposeOptions.forEach(opt => opt.classList.remove('selected'));
+				this.classList.add('selected');
+				
+				// Update dynamic tags
+				const purpose = this.getAttribute('data-purpose');
+				updatePurposeTags(purpose);
+				
+				// Update summary (will be defined later, but we'll call it via setTimeout)
+				if (typeof updateSummary === 'function') {
+					setTimeout(updateSummary, 10);
+				}
+			});
+		});
+
+		// Summary card elements
+		const summaryCard = document.getElementById('summaryCard');
+		const summaryContent = document.getElementById('summaryContent');
+		const toggleSummary = document.getElementById('toggleSummary');
+		const areaMinInput = document.getElementById('areaMin');
+		const areaMaxInput = document.getElementById('areaMax');
+		const budgetMinInput = document.getElementById('budgetMin');
+		const budgetMaxInput = document.getElementById('budgetMax');
+
+		// Occupancy display names
+		const occupancyDisplayNames = {
+			'single': 'Single',
+			'couple': 'Couple',
+			'family': 'Family with kids',
+			'roommates': 'Roommates'
+		};
+
+		// Purpose display names
+		const purposeDisplayNames = {
+			'family-home': 'Family home',
+			'investment': 'Investment / Flipper',
+			'rental': 'To rent it out',
+			'vacation': 'Vacation home'
+		};
+
+		// Function to format currency
+		function formatCurrency(value) {
+			return '€' + parseInt(value).toLocaleString();
+		}
+
+		// Function to update summary
+		function updateSummary() {
+			// Show summary card
+			summaryCard.style.display = 'block';
+
+			// Update area
+			const areaMin = areaMinInput.value || 1;
+			const areaMax = areaMaxInput.value || 10;
+			document.getElementById('summaryAreaValue').textContent = `${areaMin}-${areaMax} km`;
+
+			// Update budget
+			const budgetMin = budgetMinInput.value || 200000;
+			const budgetMax = budgetMaxInput.value || 500000;
+			document.getElementById('summaryBudgetValue').textContent = `${formatCurrency(budgetMin)} - ${formatCurrency(budgetMax)}`;
+
+			// Update occupancy
+			const selectedOccupancy = document.querySelector('#occupancyOptions .purpose-option.selected');
+			if (selectedOccupancy) {
+				const occupancy = selectedOccupancy.getAttribute('data-occupancy');
+				document.getElementById('summaryOccupancyValue').textContent = occupancyDisplayNames[occupancy] || occupancy;
+			}
+
+			// Update size
+			document.getElementById('summarySizeValue').textContent = sizeSlider.value + ' m²';
+
+			// Update purpose
+			const selectedPurpose = document.querySelector('#purposeOptions .purpose-option.selected');
+			if (selectedPurpose) {
+				const purpose = selectedPurpose.getAttribute('data-purpose');
+				document.getElementById('summaryPurposeValue').textContent = purposeDisplayNames[purpose] || purpose;
+			}
+		}
+
+		// Toggle summary card collapse/expand
+		let isSummaryExpanded = true;
+		toggleSummary.addEventListener('click', function() {
+			isSummaryExpanded = !isSummaryExpanded;
+			if (isSummaryExpanded) {
+				summaryContent.style.display = 'grid';
+				toggleSummary.textContent = '▼';
+			} else {
+				summaryContent.style.display = 'none';
+				toggleSummary.textContent = '▶';
+			}
+		});
+
+		// Update summary when inputs change
+		areaMinInput.addEventListener('input', updateSummary);
+		areaMaxInput.addEventListener('input', updateSummary);
+		budgetMinInput.addEventListener('input', updateSummary);
+		budgetMaxInput.addEventListener('input', updateSummary);
+		sizeSlider.addEventListener('input', updateSummary);
+
+		// Note: Occupancy event listener is already set up above, it will call updateSummary
+
+		// Update summary when purpose changes
+		purposeOptions.forEach(option => {
+			option.addEventListener('click', function() {
+				// Existing purpose logic...
+				purposeOptions.forEach(opt => opt.classList.remove('selected'));
+				this.classList.add('selected');
+				
+				const purpose = this.getAttribute('data-purpose');
+				updatePurposeTags(purpose);
+				
+				// Update summary
+				updateSummary();
+			});
+		});
+
+		// Initialize summary on page load
+		updateSummary();
+
+		// Optional Filters Toggle
+		const toggleOptionalFilters = document.getElementById('toggleOptionalFilters');
+		const optionalFiltersContent = document.getElementById('optionalFiltersContent');
+		const optionalFiltersIcon = document.getElementById('optionalFiltersIcon');
+		let isOptionalFiltersExpanded = false;
+
+		toggleOptionalFilters.addEventListener('click', function() {
+			isOptionalFiltersExpanded = !isOptionalFiltersExpanded;
+			if (isOptionalFiltersExpanded) {
+				optionalFiltersContent.style.display = 'block';
+				optionalFiltersIcon.textContent = '▼';
+			} else {
+				optionalFiltersContent.style.display = 'none';
+				optionalFiltersIcon.textContent = '▶';
+			}
+		});
+
+		// Handle optional filter options (multi-select)
+		const optionalFilterOptions = document.querySelectorAll('.optional-filter-option');
+		optionalFilterOptions.forEach(option => {
+			option.addEventListener('click', function() {
+				// Toggle selected state
+				this.classList.toggle('selected');
+			});
+		});
+
+		// Form submission
+		document.querySelector('form').addEventListener('submit', function(e) {
+			e.preventDefault();
+			// In a real app, save preferences and redirect to personalized search
+			alert('Preferences saved! Redirecting to your personalized search...');
+			window.location.href = 'search.html';
+		});
+	</script>
+</body>
+</html>

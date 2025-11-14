@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PropIntelli - Analytics</title>
+	<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+	<header class="header">
+		<div class="container header-inner">
+			<div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><img src="Logo.png" alt="PropIntelli" /></a></div>
+			<nav class="nav">
+				<a href="index.html">Home</a>
+				<a href="search.html">Properties</a>
+				<a href="insights.html">Neighborhood Insights</a>
+				<a href="analytics.html">Analytics</a>
+			</nav>
+			<div class="spacer"></div>
+			<div class="auth-buttons">
+				<a class="button" href="auth.html">Login</a>
+			</div>
+		</div>
+	</header>
+
+	<main class="main">
+		<div class="container stack">
+			<div class="grid cols-4">
+				<div class="card"><h3>Price per sqm</h3><div class="placeholder">Comparisons across neighborhoods</div></div>
+				<div class="card"><h3>Historical Trends</h3><div class="placeholder">Time series chart</div></div>
+				<div class="card"><h3>Inventory & Velocity</h3><div class="placeholder">Listings count • DOM</div></div>
+				<div class="card"><h3>Affordability</h3><div class="placeholder">Income vs price</div></div>
+			</div>
+			<div class="card"><h3>Investment Profitability Estimator</h3>
+				<div class="grid" style="grid-template-columns: 1fr 1fr;">
+					<div class="stack">
+						<input class="input" placeholder="Purchase price" />
+						<input class="input" placeholder="Renovation budget" />
+						<input class="input" placeholder="Expected resale/rent" />
+						<button class="button primary">Estimate</button>
+					</div>
+					<div class="placeholder">ROI output</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="container">© 2025 PropIntelli</div>
+	</footer>
+
+	<button class="chatbot-toggle">Chat</button>
+	<div class="chatbot">
+		<div class="chatbot-header">PropIntelli Assistant</div>
+		<div class="chatbot-body">
+			<div class="small">Ask to compare price/sqm or estimate ROI.</div>
+		</div>
+		<div class="chatbot-input">
+			<input class="input" placeholder="Type your question..." />
+			<button class="button primary">Send</button>
+		</div>
+	</div>
+
+	<script src="app.js"></script>
+</body>
+</html>

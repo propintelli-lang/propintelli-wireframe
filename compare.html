@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PropIntelli - Compare</title>
+	<link rel="stylesheet" href="styles.css" />
+	<!-- Application State Manager - Centralized state management for cross-page persistence -->
+	<script src="app-state.js"></script>
+	<style>
+		.comparison-item {
+			margin-bottom: 12px;
+			padding: 8px;
+			background: #f8f9fa;
+			border-radius: 4px;
+			font-size: 14px;
+		}
+		.comparison-item strong {
+			color: #488E98;
+		}
+	</style>
+</head>
+<body>
+	<header class="header">
+		<div class="container header-inner">
+			<div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;"><img src="Logo.png" alt="PropIntelli" /></a></div>
+			<div class="search-bar">
+				<input placeholder="Compare neighborhoods" />
+				<select><option>Neighborhood A</option></select>
+				<select><option>Neighborhood B</option></select>
+				<button>Compare</button>
+			</div>
+			<div class="spacer"></div>
+			<div class="auth-buttons">
+				<a class="button" href="auth.html">Login</a>
+			</div>
+		</div>
+	</header>
+
+	<main class="main">
+		<div class="container">
+			<!-- Property Comparison Header -->
+			<div id="comparisonHeader" style="text-align: center; margin-bottom: 24px;">
+				<h2>Property Comparison</h2>
+				<p id="comparisonSubtitle">Compare selected properties side by side</p>
+			</div>
+			
+			
+			<!-- Property Comparison Grid -->
+			<div id="comparisonGrid" style="display:grid; grid-template-columns: 1fr 360px 1fr; gap:16px;">
+				<!-- Property A -->
+				<section class="stack">
+					<div class="card">
+						<h3 id="propertyATitle">Property A</h3>
+						<div id="propertyAContent">
+							<div class="placeholder">Select properties from search results to compare</div>
+						</div>
+					</div>
+				</section>
+				
+				<!-- Comparison Summary -->
+				<section class="stack">
+					<div class="card">
+						<h3>Summary</h3>
+						<div id="comparisonSummary">
+							<div class="placeholder">Comparison analysis will appear here</div>
+						</div>
+					</div>
+				</section>
+				
+				<!-- Property B -->
+				<section class="stack">
+					<div class="card">
+						<h3 id="propertyBTitle">Property B</h3>
+						<div id="propertyBContent">
+							<div class="placeholder">Select properties from search results to compare</div>
+						</div>
+					</div>
+				</section>
+			</div>
+			
+			<!-- Back to Search Button -->
+			<div style="text-align: center; margin-top: 24px;">
+				<a href="search.html" class="button primary" style="background: #488E98;">Back to Search</a>
+			</div>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="container">© 2025 PropIntelli</div>
+	</footer>
+
+	<script>
+		// Property Comparison Functionality
+		function waitForAppState(callback, maxAttempts = 20) {
+			let attempts = 0;
+			const checkAppState = () => {
+				if (typeof AppState !== 'undefined' && AppState.state) {
+					console.log('[Compare] AppState is ready, state:', AppState.state);
+					// Force reload from storage to ensure we have latest data
+					if (typeof AppState.loadFromStorage === 'function') {
+						AppState.loadFromStorage();
+					}
+					callback();
+				} else {
+					attempts++;
+					if (attempts < maxAttempts) {
+						console.log('[Compare] Waiting for AppState... attempt', attempts);
+						setTimeout(checkAppState, 100);
+					} else {
+						console.error('[Compare] AppState not available after', maxAttempts, 'attempts');
+						console.error('[Compare] AppState:', typeof AppState !== 'undefined' ? AppState : 'undefined');
+						showNoDataMessage();
+					}
+				}
+			};
+			checkAppState();
+		}
+		
+		document.addEventListener('DOMContentLoaded', function() {
+			waitForAppState(loadComparisonData);
+		});
+		
+		function loadComparisonData() {
+			console.log('[Compare] Starting loadComparisonData...');
+			
+			// Ensure AppState is initialized
+			if (typeof AppState === 'undefined') {
+				console.error('[Compare] AppState not available');
+				showNoDataMessage();
+				return;
+			}
+			
+			if (!AppState.state || Object.keys(AppState.state).length === 0) {
+				console.log('[Compare] AppState not initialized, initializing now...');
+				AppState.init();
+			}
+			
+			// Method 1: Get property indices from URL parameters
+			const urlParams = new URLSearchParams(window.location.search);
+			const p1Index = urlParams.get('p1');
+			const p2Index = urlParams.get('p2');
+			
+			console.log('[Compare] URL parameters - p1:', p1Index, 'p2:', p2Index);
+			
+			let propertyA = null;
+			let propertyB = null;
+			
+			// Get properties from API response using indices
+			if (p1Index !== null && p2Index !== null) {
+				const apiResponse = AppState.getApiResponse();
+				console.log('[Compare] API response available:', !!apiResponse);
+				
+				if (apiResponse && apiResponse.data && apiResponse.data.properties && apiResponse.data.properties.rows) {
+					const properties = apiResponse.data.properties.rows;
+					console.log('[Compare] Total properties in API response:', properties.length);
+					
+					const index1 = parseInt(p1Index);
+					const index2 = parseInt(p2Index);
+					
+					console.log('[Compare] Looking for properties at indices:', index1, 'and', index2);
+					
+					if (index1 >= 0 && index1 < properties.length && index2 >= 0 && index2 < properties.length) {
+						propertyA = properties[index1];
+						propertyB = properties[index2];
+						console.log('[Compare] ✅ Properties found via URL indices');
+						console.log('[Compare] Property A at index', index1, ':', propertyA);
+						console.log('[Compare] Property B at index', index2, ':', propertyB);
+					} else {
+						console.error('[Compare] ❌ Invalid property indices:', index1, index2, 'out of', properties.length);
+						console.error('[Compare] Valid index range: 0 to', properties.length - 1);
+					}
+				} else {
+					console.error('[Compare] ❌ API response structure is invalid');
+					console.error('[Compare] API response:', apiResponse);
+					if (apiResponse) {
+						console.error('[Compare] Has data:', !!apiResponse.data);
+						if (apiResponse.data) {
+							console.error('[Compare] Has properties:', !!apiResponse.data.properties);
+							if (apiResponse.data.properties) {
+								console.error('[Compare] Has rows:', !!apiResponse.data.properties.rows);
+								console.error('[Compare] Rows length:', apiResponse.data.properties.rows?.length);
+							}
+						}
+					}
+				}
+			} else {
+				console.log('[Compare] No URL parameters found - p1:', p1Index, 'p2:', p2Index);
+			}
+			
+			// Fallback Method 2: Try to get from AppState selectedProperties
+			if ((!propertyA || !propertyB) && typeof AppState !== 'undefined') {
+				try {
+					const selectedProperties = AppState.getSelectedProperties();
+					if (selectedProperties && Array.isArray(selectedProperties) && selectedProperties.length >= 2) {
+						propertyA = selectedProperties[0].property || selectedProperties[0];
+						propertyB = selectedProperties[1].property || selectedProperties[1];
+						console.log('[Compare] Properties found via AppState fallback');
+					}
+				} catch (e) {
+					console.error('[Compare] Error getting from AppState:', e);
+				}
+			}
+			
+			// Check if we have both properties
+			if (!propertyA || !propertyB) {
+				console.error('[Compare] ❌ Could not find properties');
+				console.error('[Compare] Property A exists:', !!propertyA);
+				console.error('[Compare] Property B exists:', !!propertyB);
+					showNoDataMessage();
+					return;
+				}
+				
+				// Load demographic data for both properties
+			loadDemographicData(propertyA, propertyB);
+		}
+		
+		async function loadDemographicData(propertyA, propertyB) {
+			try {
+				let seccStatsData = null;
+				let infrastructureData = null;
+				
+				console.log('[Compare] Loading demographic data...');
+				console.log('[Compare] AppState available:', typeof AppState !== 'undefined');
+				
+				// First try to get data from AppState
+				if (typeof AppState !== 'undefined') {
+					const apiResponse = AppState.getApiResponse();
+					console.log('[Compare] API response from AppState:', !!apiResponse);
+					console.log('[Compare] API response structure:', apiResponse ? Object.keys(apiResponse) : 'null');
+					
+					if (apiResponse) {
+						console.log('[Compare] API response.data:', apiResponse.data ? Object.keys(apiResponse.data) : 'null');
+						seccStatsData = apiResponse.data?.secc_stats?.rows || apiResponse.data?.secc_stats || null;
+						infrastructureData = apiResponse.data?.infrastructure || null;
+						
+						// If secc_stats is not in rows format, try to use it directly
+						if (!seccStatsData && apiResponse.data?.secc_stats) {
+							if (Array.isArray(apiResponse.data.secc_stats)) {
+								seccStatsData = apiResponse.data.secc_stats;
+							} else if (apiResponse.data.secc_stats.rows) {
+								seccStatsData = apiResponse.data.secc_stats.rows;
+							}
+						}
+						
+						console.log('[Compare] SeccStats data from AppState:', seccStatsData ? (Array.isArray(seccStatsData) ? seccStatsData.length + ' rows' : 'not an array') : 'null');
+						console.log('[Compare] Infrastructure data from AppState:', !!infrastructureData);
+					} else {
+						console.log('[Compare] No API response in AppState');
+					}
+				}
+				
+				// Fallback: try to get data from localStorage
+				if (!seccStatsData || !Array.isArray(seccStatsData) || seccStatsData.length === 0 || !infrastructureData) {
+					console.log('[Compare] Trying localStorage fallback...');
+					const lastApiResponse = localStorage.getItem('lastApiResponse');
+				if (lastApiResponse) {
+						try {
+					const response = JSON.parse(lastApiResponse);
+							console.log('[Compare] Parsed localStorage response:', response ? Object.keys(response) : 'null');
+							
+							if (!seccStatsData || !Array.isArray(seccStatsData) || seccStatsData.length === 0) {
+								seccStatsData = response.data?.secc_stats?.rows || response.data?.secc_stats || null;
+								if (Array.isArray(seccStatsData)) {
+									console.log('[Compare] Using cached SeccStats data from localStorage:', seccStatsData.length, 'rows');
+								} else {
+									console.log('[Compare] SeccStats from localStorage is not an array:', seccStatsData);
+								}
+							}
+							if (!infrastructureData) {
+								infrastructureData = response.data?.infrastructure || null;
+								console.log('[Compare] Using cached Infrastructure data from localStorage:', !!infrastructureData);
+							}
+						} catch (e) {
+							console.error('[Compare] Error parsing localStorage data:', e);
+						}
+					} else {
+						console.log('[Compare] No data in localStorage');
+					}
+				}
+				
+				// Ensure seccStatsData is an array
+				if (seccStatsData && !Array.isArray(seccStatsData)) {
+					console.error('[Compare] SeccStats data is not an array:', seccStatsData);
+					seccStatsData = null;
+				}
+				
+				// If no cached data, try to fetch from API
+				if (!seccStatsData || seccStatsData.length === 0) {
+					console.log('[Compare] No cached data, fetching from API...');
+					seccStatsData = await fetchSeccStatsData();
+					if (seccStatsData && !Array.isArray(seccStatsData)) {
+						console.error('[Compare] Fetched SeccStats data is not an array:', seccStatsData);
+						seccStatsData = null;
+					}
+				}
+				
+				console.log('[Compare] Final seccStatsData:', seccStatsData ? (Array.isArray(seccStatsData) ? seccStatsData.length + ' rows' : 'not an array') : 'null');
+				
+				// Get infrastructure counts for each property
+				const infrastructureA = getInfrastructureCounts(propertyA, infrastructureData);
+				const infrastructureB = getInfrastructureCounts(propertyB, infrastructureData);
+				
+				// Display properties with demographic data and infrastructure
+				displayPropertyComparison(propertyA, propertyB, seccStatsData, infrastructureA, infrastructureB);
+				
+			} catch (error) {
+				console.error('[Compare] Error loading demographic data:', error);
+				console.error('[Compare] Error stack:', error.stack);
+				// Still display properties without demographic data
+				displayPropertyComparison(propertyA, propertyB, null, null, null);
+			}
+		}
+		
+		function getInfrastructureCounts(property, infrastructureData) {
+			if (!infrastructureData || !infrastructureData.rows || !Array.isArray(infrastructureData.rows)) {
+				console.log('[Compare] No infrastructure data available');
+				return { hospitals: 0, pharmacies: 0, schools: 0, supermarkets: 0 };
+			}
+			
+			// Get property's seccion_name
+			const propertySectionName = property.seccion_name;
+			console.log('[Compare] Property seccion_name:', propertySectionName);
+			
+			// Try to get property coordinates from various possible fields
+			const propertyLat = property.latitude || property.lat || property.latitude_property || property.lat_property;
+			const propertyLon = property.longitude || property.lon || property.longitude_property || property.lon_property;
+			
+			console.log('[Compare] Property coordinates:', { lat: propertyLat, lon: propertyLon });
+			
+			let filteredInfrastructure = infrastructureData.rows;
+			
+			// Step 1: Filter by seccion_name if available
+			if (propertySectionName) {
+				filteredInfrastructure = filteredInfrastructure.filter(item => {
+					const itemSectionName = item.seccion_name || item.secc_area_name || item.area_name;
+					if (!itemSectionName) {
+						// If infrastructure item has no seccion_name, we'll still consider it if it's within distance
+						return true;
+					}
+					// Match seccion_name (case-insensitive)
+					const match = itemSectionName.toString().trim().toLowerCase() === propertySectionName.toString().trim().toLowerCase();
+					if (match) {
+						console.log('[Compare] Infrastructure item matches seccion_name:', item.name_infra, 'in section:', itemSectionName);
+					}
+					return match;
+				});
+				console.log('[Compare] Infrastructure filtered by seccion_name:', filteredInfrastructure.length, 'items match section:', propertySectionName);
+			}
+			
+			// Step 2: Further filter by distance (within 2km) if coordinates are available
+			if (propertyLat && propertyLon) {
+				const maxDistance = 2; // km
+				const distanceFiltered = filteredInfrastructure.filter(item => {
+					if (!item.latitude_infra || !item.longitude_infra) {
+						console.log('[Compare] Infrastructure item missing coordinates:', item.name_infra);
+						// If item matched by seccion_name but has no coordinates, still include it
+						return true;
+					}
+					
+					// Calculate distance using Haversine formula
+					const distance = calculateDistance(
+						parseFloat(propertyLat), parseFloat(propertyLon),
+						parseFloat(item.latitude_infra), parseFloat(item.longitude_infra)
+					);
+					
+					return distance <= maxDistance;
+				});
+				
+				console.log('[Compare] Infrastructure within 2km of coordinates:', distanceFiltered.length, 'items');
+				filteredInfrastructure = distanceFiltered;
+			} else {
+				console.log('[Compare] Property has no coordinates, using seccion_name filter only');
+			}
+			
+			console.log('[Compare] Final filtered infrastructure:', filteredInfrastructure.length, 'items');
+			
+			return {
+				hospitals: filteredInfrastructure.filter(i => i.type_infra && i.type_infra.toLowerCase().includes('hospital')).length,
+				pharmacies: filteredInfrastructure.filter(i => i.type_infra && i.type_infra.toLowerCase().includes('pharmacy')).length,
+				schools: filteredInfrastructure.filter(i => i.type_infra && i.type_infra.toLowerCase().includes('school')).length,
+				supermarkets: filteredInfrastructure.filter(i => i.type_infra && (i.type_infra.toLowerCase().includes('supermarket') || i.type_infra.toLowerCase().includes('supermarkt'))).length
+			};
+		}
+		
+		function calculateDistance(lat1, lon1, lat2, lon2) {
+			const R = 6371; // Earth's radius in km
+			const dLat = (lat2 - lat1) * Math.PI / 180;
+			const dLon = (lon2 - lon1) * Math.PI / 180;
+			const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+					  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+					  Math.sin(dLon/2) * Math.sin(dLon/2);
+			const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+			return R * c; // Distance in km
+		}
+		
+		async function fetchSeccStatsData() {
+			try {
+				// Get search parameters from localStorage or use defaults
+				const searchParams = JSON.parse(localStorage.getItem('lastSearchParams') || '{}');
+				const lat = searchParams.lat || 36.7213; // Default to Malaga
+				const lon = searchParams.lon || -4.4214;
+				const radius = searchParams.radius || 1;
+				
+				console.log('Fetching SeccStats data for:', { lat, lon, radius });
+				
+				// Make API call to get demographic data
+				const response = await fetch('/api/neighborhood-insights', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						lat: lat,
+						lon: lon,
+						radius: radius
+					})
+				});
+				
+				if (!response.ok) {
+					throw new Error(`API request failed: ${response.status}`);
+				}
+				
+				const data = await response.json();
+				console.log('API response received:', data);
+				
+				// Extract SeccStats data
+				const seccStatsData = data.data?.secc_stats?.rows || [];
+				console.log('SeccStats data extracted:', seccStatsData.length, 'rows');
+				
+				// Cache the response
+				localStorage.setItem('lastApiResponse', JSON.stringify(data));
+				
+				return seccStatsData;
+				
+			} catch (error) {
+				console.error('Error fetching SeccStats data:', error);
+				return null;
+			}
+		}
+		
+		function showNoDataMessage() {
+			document.getElementById('comparisonHeader').innerHTML = `
+				<h2>No Properties Selected</h2>
+				<p>Please go back to search results and select properties to compare</p>
+			`;
+			document.getElementById('comparisonGrid').innerHTML = `
+				<div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+					<div class="placeholder">No properties selected for comparison</div>
+					<a href="search.html" class="button primary" style="background: #488E98; margin-top: 16px;">Go to Search</a>
+				</div>
+			`;
+		}
+		
+		function displayPropertyComparison(propertyA, propertyB, seccStatsData, infrastructureA, infrastructureB) {
+			// propertyA and propertyB should be the property objects directly
+			const propA = propertyA && (propertyA.property || propertyA);
+			const propB = propertyB && (propertyB.property || propertyB);
+			
+			console.log('[Compare] Displaying comparison');
+			console.log('[Compare] Property A:', propA);
+			console.log('[Compare] Property B:', propB);
+			console.log('[Compare] SeccStats data:', seccStatsData);
+			console.log('[Compare] SeccStats data length:', seccStatsData?.length || 0);
+			console.log('[Compare] SeccStats data type:', Array.isArray(seccStatsData) ? 'Array' : typeof seccStatsData);
+			if (seccStatsData && Array.isArray(seccStatsData) && seccStatsData.length > 0) {
+				console.log('[Compare] Sample secc_stats row:', seccStatsData[0]);
+				console.log('[Compare] Available secc_stats sections:', [...new Set(seccStatsData.map(r => r.secc_area_name || r.seccion_name).filter(Boolean))]);
+			}
+			console.log('[Compare] Infrastructure A:', infrastructureA);
+			console.log('[Compare] Infrastructure B:', infrastructureB);
+			
+			if (!propA || !propB) {
+				console.error('[Compare] Missing property data');
+				showNoDataMessage();
+				return;
+			}
+			
+			// Get demographic data for each property's section
+			const demographicA = getDemographicData(propA, seccStatsData);
+			const demographicB = getDemographicData(propB, seccStatsData);
+			
+			console.log('[Compare] Demographic A:', demographicA);
+			console.log('[Compare] Demographic B:', demographicB);
+			
+			// Update property A
+			document.getElementById('propertyATitle').textContent = 'Property A';
+			document.getElementById('propertyAContent').innerHTML = generatePropertyCard(propA, demographicA, infrastructureA);
+			
+			// Update property B
+			document.getElementById('propertyBTitle').textContent = 'Property B';
+			document.getElementById('propertyBContent').innerHTML = generatePropertyCard(propB, demographicB, infrastructureB);
+			
+			// Generate comparison summary
+			document.getElementById('comparisonSummary').innerHTML = generateComparisonSummary(propA, propB, demographicA, demographicB);
+		}
+		
+		function getDemographicData(property, seccStatsData) {
+			console.log('[Compare] Getting demographic data for property:', property);
+			console.log('[Compare] Property seccion_name:', property.seccion_name);
+			console.log('[Compare] Property secc_area_name:', property.secc_area_name);
+			console.log('[Compare] SeccStats data available:', !!seccStatsData);
+			console.log('[Compare] SeccStats data length:', seccStatsData?.length);
+			console.log('[Compare] SeccStats data type:', Array.isArray(seccStatsData) ? 'Array' : typeof seccStatsData);
+			
+			if (!seccStatsData || !Array.isArray(seccStatsData) || seccStatsData.length === 0) {
+				console.log('[Compare] ❌ No SeccStats data available');
+				console.log('[Compare] SeccStats data:', seccStatsData);
+				return { error: 'No demographic data available' };
+			}
+			
+			// Step 1: Get seccion_name from the Property object
+			const propertySectionName = property.seccion_name;
+			
+			if (!propertySectionName) {
+				console.log('[Compare] ❌ Property has no seccion_name');
+				console.log('[Compare] Property keys:', Object.keys(property));
+				console.log('[Compare] Property object:', JSON.stringify(property, null, 2));
+				return { error: 'Property section not specified (seccion_name is required)' };
+			}
+			
+			console.log('[Compare] Step 1: Property seccion_name:', propertySectionName);
+			
+			// Step 2: Filter secc_stats by matching area_name (or secc_area_name) with property's seccion_name
+			// Try both area_name and secc_area_name fields in secc_stats
+			let sectionData = seccStatsData.filter(row => {
+				const rowAreaName = row.area_name || row.secc_area_name || row.seccion_name;
+				if (!rowAreaName) return false;
+				
+				// Exact match (case-insensitive)
+				const match = rowAreaName.toString().trim().toLowerCase() === propertySectionName.toString().trim().toLowerCase();
+				return match;
+			});
+			
+			console.log('[Compare] Step 2: Found', sectionData.length, 'rows matching area_name/secc_area_name:', propertySectionName);
+			
+			if (sectionData.length === 0) {
+				console.log('[Compare] ❌ No secc_stats rows found for section:', propertySectionName);
+				// Show available sections for debugging
+				const availableSections = [...new Set(seccStatsData.map(r => r.area_name || r.secc_area_name || r.seccion_name).filter(Boolean))];
+				console.log('[Compare] Available sections in secc_stats (first 10):', availableSections.slice(0, 10));
+				console.log('[Compare] Total unique sections:', availableSections.length);
+				return { error: `No data found for section: ${propertySectionName}` };
+			}
+			
+			// Step 3: From filtered sectionData, get POP_TOTAL indicator
+			const popTotalRows = sectionData.filter(r => r.indicator_code === 'POP_TOTAL');
+			console.log('[Compare] Step 3: Found', popTotalRows.length, 'POP_TOTAL rows in section data');
+			
+			// Process comprehensive demographic data
+			const demographics = {
+				// Total Population: Get value from POP_TOTAL indicator
+				totalPopulation: popTotalRows.find(r => !r.subgroup)?.value || 
+								 popTotalRows.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0) || 0,
+				
+				// Gender Distribution
+				genderDistribution: {
+					male: sectionData.filter(r => r.indicator_code === 'POP_TOTAL' && r.subgroup && r.subgroup.toLowerCase() === 'male')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					female: sectionData.filter(r => r.indicator_code === 'POP_TOTAL' && r.subgroup && r.subgroup.toLowerCase() === 'female')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0)
+				},
+				
+				// Education Breakdown
+				educationBreakdown: {
+					primary: sectionData.filter(r => r.indicator_code === 'EDU_PRIM_OR_LOWER')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					secondary: sectionData.filter(r => r.indicator_code === 'EDU_LOWER_SECONDARY')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					upperSecondary: sectionData.filter(r => r.indicator_code === 'EDU_UPPERSEC_POSTSEC_NS' || r.indicator_code === 'EDU_UPPER_SECONDARY' || r.indicator_code === 'EDU_UPPER_SEC')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					tertiary: sectionData.filter(r => r.indicator_code === 'EDU_TERTIARY')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0)
+				},
+				
+				// Income
+				income: {
+					perCapita: sectionData.find(r => r.indicator_code === 'GROSS_INC_PC')?.value || 0,
+					household: sectionData.find(r => r.indicator_code === 'GROSS_INC_HH')?.value || 0,
+					median: sectionData.find(r => r.indicator_code === 'MED_INC_EQ')?.value || 0,
+					netHousehold: sectionData.find(r => r.indicator_code === 'NET_INC_HH')?.value || 0
+				},
+				
+				// Age Distribution
+				ageDistribution: {
+					children: sectionData.filter(r => r.indicator_code === 'POP_0_14')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					youth: sectionData.filter(r => r.indicator_code === 'POP_15_24')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					adults: sectionData.filter(r => r.indicator_code === 'POP_25_39')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					middleAge: sectionData.filter(r => r.indicator_code === 'POP_40_64')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0),
+					seniors: sectionData.filter(r => r.indicator_code === 'POP_65_PLUS')
+						.reduce((sum, r) => sum + (parseInt(r.value) || 0), 0)
+				},
+				
+				// Origins (Migration Patterns)
+				origins: {
+					spanishNatives: sectionData.find(r => r.indicator_code === 'POP_NAT_ES')?.value || 0,
+					euNativesTotal: sectionData.find(r => r.indicator_code === 'POP_NAT_EU_TOTAL')?.value || 0,
+					foreignBornAfrica: sectionData.find(r => r.indicator_code === 'POP_NAT_FOR_AF')?.value || 0,
+					foreignBornAmerica: sectionData.find(r => r.indicator_code === 'POP_NAT_FOR_AM')?.value || 0,
+					foreignBornAsia: sectionData.find(r => r.indicator_code === 'POP_NAT_FOR_AS')?.value || 0,
+					foreignBornEuropeNoEs: sectionData.find(r => r.indicator_code === 'POP_NAT_FOR_EU_NO_ES')?.value || 0,
+					foreignBornOther: sectionData.find(r => r.indicator_code === 'POP_NAT_FOR_OTHER')?.value || 0
+				}
+			};
+			
+			console.log('[Compare] Processed demographics:', demographics);
+			
+			// Calculate percentages
+			if (demographics.totalPopulation > 0) {
+				demographics.genderDistribution.malePercent = ((demographics.genderDistribution.male / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.genderDistribution.femalePercent = ((demographics.genderDistribution.female / demographics.totalPopulation) * 100).toFixed(1);
+				
+				demographics.educationBreakdown.primaryPercent = ((demographics.educationBreakdown.primary / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.educationBreakdown.secondaryPercent = ((demographics.educationBreakdown.secondary / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.educationBreakdown.upperSecondaryPercent = ((demographics.educationBreakdown.upperSecondary / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.educationBreakdown.tertiaryPercent = ((demographics.educationBreakdown.tertiary / demographics.totalPopulation) * 100).toFixed(1);
+				
+				demographics.ageDistribution.childrenPercent = ((demographics.ageDistribution.children / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.ageDistribution.youthPercent = ((demographics.ageDistribution.youth / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.ageDistribution.adultsPercent = ((demographics.ageDistribution.adults / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.ageDistribution.middleAgePercent = ((demographics.ageDistribution.middleAge / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.ageDistribution.seniorsPercent = ((demographics.ageDistribution.seniors / demographics.totalPopulation) * 100).toFixed(1);
+				
+				// Calculate percentages for origins
+				demographics.origins.spanishNativesPercent = ((demographics.origins.spanishNatives / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.origins.euNativesTotalPercent = ((demographics.origins.euNativesTotal / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.origins.foreignBornAfricaPercent = ((demographics.origins.foreignBornAfrica / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.origins.foreignBornAmericaPercent = ((demographics.origins.foreignBornAmerica / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.origins.foreignBornAsiaPercent = ((demographics.origins.foreignBornAsia / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.origins.foreignBornEuropeNoEsPercent = ((demographics.origins.foreignBornEuropeNoEs / demographics.totalPopulation) * 100).toFixed(1);
+				demographics.origins.foreignBornOtherPercent = ((demographics.origins.foreignBornOther / demographics.totalPopulation) * 100).toFixed(1);
+				
+				// Calculate total foreign born
+				demographics.origins.totalForeignBorn = demographics.origins.foreignBornAfrica + 
+					demographics.origins.foreignBornAmerica + 
+					demographics.origins.foreignBornAsia + 
+					demographics.origins.foreignBornEuropeNoEs + 
+					demographics.origins.foreignBornOther;
+				demographics.origins.totalForeignBornPercent = ((demographics.origins.totalForeignBorn / demographics.totalPopulation) * 100).toFixed(1);
+			}
+			
+			return demographics;
+		}
+		
+		function generatePropertyCard(property, demographics, infrastructure) {
+			// Format price
+			const price = property.price_amount ? 
+				`€${property.price_amount.toLocaleString()}` : 
+				'Price not available';
+			
+			// Build meta line (sqm • rooms)
+			const metaParts = [];
+			if (property.sqm) metaParts.push(`${property.sqm} m²`);
+			if (property.rooms) metaParts.push(`${property.rooms} rooms`);
+			const metaLine = metaParts.join(' • ');
+			
+			// Location
+			const location = property.location_optimized || property.location || 'Location not specified';
+			
+			// Original listing link
+			const originalListingLink = property.url ? 
+				`<a class="small" href="${property.url}" target="_blank">Original listing</a>` : 
+				'<span class="small">Original listing not available</span>';
+			
+			// Generate badges
+			const badges = [];
+			if (property.good_condition === true) {
+				badges.push('<span class="badge">Good condition</span>');
+			}
+			if (property.needs_renovation === true) {
+				badges.push('<span class="badge warn">Needs renovation</span>');
+			}
+			
+			// Generate comprehensive demographic section
+			const demographicSection = generateDemographicSection(demographics);
+			
+			// Generate infrastructure section
+			const infrastructureSection = generateInfrastructureSection(infrastructure);
+			
+			return `
+				<div style="padding: 16px;">
+					<div style="display:flex; align-items:center; gap:8px; justify-content:space-between; margin-bottom: 12px;">
+						<strong style="font-size: 18px; color: #488E98;">${price}</strong>
+					</div>
+					${badges.length > 0 ? `<div class="badges" style="margin-bottom: 12px;">${badges.join('')}</div>` : ''}
+					${metaLine ? `<div class="property-meta" style="margin-bottom: 8px;"><span>${metaLine}</span></div>` : ''}
+					<div style="margin-bottom: 12px; color: #6b7280; font-size: 14px;">${location}</div>
+					<div style="margin-bottom: 12px;">${originalListingLink}</div>
+					
+					${demographicSection}
+					${infrastructureSection}
+					
+					<div style="font-size: 12px; color: #9ca3af; margin-top: 12px;">
+						Property ID: ${property.id || 'N/A'}
+					</div>
+				</div>
+			`;
+		}
+		
+		function generateInfrastructureSection(infrastructure) {
+			if (!infrastructure) {
+				return `
+					<div style="margin-top: 16px; padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #6c757d;">
+						<h4 style="margin: 0 0 12px 0; color: #6c757d; font-size: 14px;">Nearby Infrastructure</h4>
+						<div style="color: #6c757d; font-size: 12px;">
+							No infrastructure data available
+						</div>
+					</div>
+				`;
+			}
+			
+			return `
+				<div style="margin-top: 16px; padding: 12px; background: #e8f5e9; border-radius: 6px; border-left: 3px solid #4caf50;">
+					<h4 style="margin: 0 0 12px 0; color: #2e7d32; font-size: 14px;">Nearby Infrastructure (within 2km)</h4>
+					<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+						<div style="text-align: center; padding: 8px; background: #fff; border-radius: 4px;">
+							<div style="font-size: 20px; font-weight: bold; color: #dc2626;">🏥</div>
+							<div style="font-size: 18px; font-weight: 600; color: #333; margin-top: 4px;">${infrastructure.hospitals || 0}</div>
+							<div style="font-size: 11px; color: #666; margin-top: 2px;">Hospitals</div>
+						</div>
+						<div style="text-align: center; padding: 8px; background: #fff; border-radius: 4px;">
+							<div style="font-size: 20px; font-weight: bold; color: #059669;">💊</div>
+							<div style="font-size: 18px; font-weight: 600; color: #333; margin-top: 4px;">${infrastructure.pharmacies || 0}</div>
+							<div style="font-size: 11px; color: #666; margin-top: 2px;">Pharmacies</div>
+						</div>
+						<div style="text-align: center; padding: 8px; background: #fff; border-radius: 4px;">
+							<div style="font-size: 20px; font-weight: bold; color: #2563eb;">🏫</div>
+							<div style="font-size: 18px; font-weight: 600; color: #333; margin-top: 4px;">${infrastructure.schools || 0}</div>
+							<div style="font-size: 11px; color: #666; margin-top: 2px;">Schools</div>
+						</div>
+						<div style="text-align: center; padding: 8px; background: #fff; border-radius: 4px;">
+							<div style="font-size: 20px; font-weight: bold; color: #7c3aed;">🛒</div>
+							<div style="font-size: 18px; font-weight: 600; color: #333; margin-top: 4px;">${infrastructure.supermarkets || 0}</div>
+							<div style="font-size: 11px; color: #666; margin-top: 2px;">Supermarkets</div>
+						</div>
+					</div>
+				</div>
+			`;
+		}
+		
+		function generateDemographicSection(demographics) {
+			// Check if there's an error
+			if (demographics && demographics.error) {
+				return `
+					<div style="margin-top: 16px; padding: 12px; background: #fff3cd; border-radius: 6px; border-left: 3px solid #ffc107;">
+						<h4 style="margin: 0 0 12px 0; color: #856404; font-size: 14px;">Neighborhood Demographics</h4>
+						<div style="color: #856404; font-size: 12px;">
+							⚠️ ${demographics.error}
+						</div>
+					</div>
+				`;
+			}
+			
+			// Check if demographics data is available
+			if (!demographics) {
+				return `
+					<div style="margin-top: 16px; padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #6c757d;">
+						<h4 style="margin: 0 0 12px 0; color: #6c757d; font-size: 14px;">Neighborhood Demographics</h4>
+						<div style="color: #6c757d; font-size: 12px;">
+							No demographic data available
+						</div>
+					</div>
+				`;
+			}
+			
+			return `
+				<div style="margin-top: 16px; padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #488E98;">
+					<h4 style="margin: 0 0 12px 0; color: #488E98; font-size: 14px; font-weight: 600;">Neighborhood Demographics</h4>
+					
+					<!-- Total Population -->
+					<div style="margin-bottom: 10px; padding: 8px; background: #fff; border-radius: 4px;">
+						<strong style="color: #333; font-size: 12px;">Total Population:</strong>
+						<div style="font-size: 16px; font-weight: 600; color: #488E98; margin-top: 4px;">
+							${demographics.totalPopulation ? demographics.totalPopulation.toLocaleString() : 'N/A'}
+						</div>
+					</div>
+					
+					<!-- Gender Distribution -->
+					<div style="margin-bottom: 10px; padding: 8px; background: #fff; border-radius: 4px;">
+						<strong style="color: #333; font-size: 12px;">Gender Distribution:</strong>
+						<div style="display: flex; gap: 16px; margin-top: 6px;">
+							<div style="font-size: 13px;">
+								<span style="color: #3498db; font-weight: 600;">♂</span> Male: 
+								<span style="font-weight: 600;">${demographics.genderDistribution?.malePercent || 0}%</span>
+								<span style="color: #9ca3af; font-size: 11px;">(${demographics.genderDistribution?.male?.toLocaleString() || 0})</span>
+							</div>
+							<div style="font-size: 13px;">
+								<span style="color: #e91e63; font-weight: 600;">♀</span> Female: 
+								<span style="font-weight: 600;">${demographics.genderDistribution?.femalePercent || 0}%</span>
+								<span style="color: #9ca3af; font-size: 11px;">(${demographics.genderDistribution?.female?.toLocaleString() || 0})</span>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Education Breakdown -->
+					<div style="margin-bottom: 10px; padding: 8px; background: #fff; border-radius: 4px;">
+						<strong style="color: #333; font-size: 12px;">Education Breakdown:</strong>
+						<div style="margin-top: 6px;">
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Primary:</span>
+								<span style="font-weight: 600;">${demographics.educationBreakdown?.primaryPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Secondary:</span>
+								<span style="font-weight: 600;">${demographics.educationBreakdown?.secondaryPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Upper Secondary:</span>
+								<span style="font-weight: 600;">${demographics.educationBreakdown?.upperSecondaryPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; display: flex; justify-content: space-between;">
+								<span>Tertiary:</span>
+								<span style="font-weight: 600;">${demographics.educationBreakdown?.tertiaryPercent || 0}%</span>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Income -->
+					<div style="margin-bottom: 10px; padding: 8px; background: #fff; border-radius: 4px;">
+						<strong style="color: #333; font-size: 12px;">Income:</strong>
+						<div style="margin-top: 6px;">
+							<div style="font-size: 12px; margin-bottom: 4px;">
+								<span style="color: #666;">Per Capita:</span>
+								<span style="font-weight: 600; color: #2ecc71; margin-left: 8px;">
+									${demographics.income?.perCapita ? '€' + parseInt(demographics.income.perCapita).toLocaleString() : 'N/A'}
+								</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px;">
+								<span style="color: #666;">Household:</span>
+								<span style="font-weight: 600; color: #2ecc71; margin-left: 8px;">
+									${demographics.income?.household ? '€' + parseInt(demographics.income.household).toLocaleString() : 'N/A'}
+								</span>
+							</div>
+							<div style="font-size: 12px;">
+								<span style="color: #666;">Median:</span>
+								<span style="font-weight: 600; color: #2ecc71; margin-left: 8px;">
+									${demographics.income?.median ? '€' + parseInt(demographics.income.median).toLocaleString() : 'N/A'}
+								</span>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Age Distribution -->
+					<div style="margin-bottom: 10px; padding: 8px; background: #fff; border-radius: 4px;">
+						<strong style="color: #333; font-size: 12px;">Age Distribution:</strong>
+						<div style="margin-top: 6px;">
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Children (0-14):</span>
+								<span style="font-weight: 600;">${demographics.ageDistribution?.childrenPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Youth (15-24):</span>
+								<span style="font-weight: 600;">${demographics.ageDistribution?.youthPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Adults (25-39):</span>
+								<span style="font-weight: 600;">${demographics.ageDistribution?.adultsPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Middle Age (40-64):</span>
+								<span style="font-weight: 600;">${demographics.ageDistribution?.middleAgePercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; display: flex; justify-content: space-between;">
+								<span>Seniors (65+):</span>
+								<span style="font-weight: 600;">${demographics.ageDistribution?.seniorsPercent || 0}%</span>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Origins -->
+					<div style="padding: 8px; background: #fff; border-radius: 4px;">
+						<strong style="color: #333; font-size: 12px;">Origins:</strong>
+						<div style="margin-top: 6px;">
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Spanish Natives:</span>
+								<span style="font-weight: 600;">${demographics.origins?.spanishNativesPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>EU Natives (Total):</span>
+								<span style="font-weight: 600;">${demographics.origins?.euNativesTotalPercent || 0}%</span>
+							</div>
+							<div style="font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+								<span>Foreign Born (Total):</span>
+								<span style="font-weight: 600;">${demographics.origins?.totalForeignBornPercent || 0}%</span>
+							</div>
+							<div style="font-size: 11px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; color: #6b7280;">
+								<strong style="color: #333;">Foreign Born by Region:</strong>
+							</div>
+							<div style="font-size: 11px; margin-top: 4px; margin-left: 8px; display: flex; justify-content: space-between;">
+								<span>• Africa:</span>
+								<span style="font-weight: 600;">${demographics.origins?.foreignBornAfricaPercent || 0}%</span>
+							</div>
+							<div style="font-size: 11px; margin-top: 2px; margin-left: 8px; display: flex; justify-content: space-between;">
+								<span>• America:</span>
+								<span style="font-weight: 600;">${demographics.origins?.foreignBornAmericaPercent || 0}%</span>
+							</div>
+							<div style="font-size: 11px; margin-top: 2px; margin-left: 8px; display: flex; justify-content: space-between;">
+								<span>• Asia:</span>
+								<span style="font-weight: 600;">${demographics.origins?.foreignBornAsiaPercent || 0}%</span>
+							</div>
+							<div style="font-size: 11px; margin-top: 2px; margin-left: 8px; display: flex; justify-content: space-between;">
+								<span>• Europe (non-ES):</span>
+								<span style="font-weight: 600;">${demographics.origins?.foreignBornEuropeNoEsPercent || 0}%</span>
+							</div>
+							<div style="font-size: 11px; margin-top: 2px; margin-left: 8px; display: flex; justify-content: space-between;">
+								<span>• Other:</span>
+								<span style="font-weight: 600;">${demographics.origins?.foreignBornOtherPercent || 0}%</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			`;
+		}
+		
+		function generateComparisonSummary(propertyA, propertyB, demographicA, demographicB) {
+			const comparisons = [];
+			
+			// Price comparison
+			if (propertyA.price_amount && propertyB.price_amount) {
+				const priceDiff = propertyA.price_amount - propertyB.price_amount;
+				const priceDiffPercent = ((priceDiff / propertyB.price_amount) * 100).toFixed(1);
+				const priceComparison = priceDiff > 0 ? 
+					`Property A is €${priceDiff.toLocaleString()} (${priceDiffPercent}%) more expensive` :
+					`Property B is €${Math.abs(priceDiff).toLocaleString()} (${Math.abs(priceDiffPercent)}%) more expensive`;
+				comparisons.push(`<div class="comparison-item"><strong>Price:</strong> ${priceComparison}</div>`);
+			}
+			
+			// Size comparison
+			if (propertyA.sqm && propertyB.sqm) {
+				const sizeDiff = propertyA.sqm - propertyB.sqm;
+				const sizeDiffPercent = ((sizeDiff / propertyB.sqm) * 100).toFixed(1);
+				const sizeComparison = sizeDiff > 0 ? 
+					`Property A is ${sizeDiff} m² (${sizeDiffPercent}%) larger` :
+					`Property B is ${Math.abs(sizeDiff)} m² (${Math.abs(sizeDiffPercent)}%) larger`;
+				comparisons.push(`<div class="comparison-item"><strong>Size:</strong> ${sizeComparison}</div>`);
+			}
+			
+			// Rooms comparison
+			if (propertyA.rooms && propertyB.rooms) {
+				const roomsDiff = propertyA.rooms - propertyB.rooms;
+				const roomsComparison = roomsDiff > 0 ? 
+					`Property A has ${roomsDiff} more room${roomsDiff > 1 ? 's' : ''}` :
+					roomsDiff < 0 ? `Property B has ${Math.abs(roomsDiff)} more room${Math.abs(roomsDiff) > 1 ? 's' : ''}` :
+					'Both properties have the same number of rooms';
+				comparisons.push(`<div class="comparison-item"><strong>Rooms:</strong> ${roomsComparison}</div>`);
+			}
+			
+			// Condition comparison
+			if (propertyA.condition && propertyB.condition) {
+				const conditionComparison = propertyA.condition === propertyB.condition ? 
+					'Both properties have the same condition' :
+					`Property A: ${propertyA.condition}, Property B: ${propertyB.condition}`;
+				comparisons.push(`<div class="comparison-item"><strong>Condition:</strong> ${conditionComparison}</div>`);
+			}
+			
+			// Location comparison
+			const locationA = propertyA.location_optimized || propertyA.location || 'Unknown';
+			const locationB = propertyB.location_optimized || propertyB.location || 'Unknown';
+			comparisons.push(`<div class="comparison-item"><strong>Location A:</strong> ${locationA}</div>`);
+			comparisons.push(`<div class="comparison-item"><strong>Location B:</strong> ${locationB}</div>`);
+			
+			// Demographic comparisons
+			if (demographicA && demographicB) {
+				// Net Income comparison
+				const incomeDiff = demographicA.netIncomePerHousehold - demographicB.netIncomePerHousehold;
+				const incomeDiffPercent = demographicB.netIncomePerHousehold > 0 ? 
+					((incomeDiff / demographicB.netIncomePerHousehold) * 100).toFixed(1) : 0;
+				const incomeComparison = incomeDiff > 0 ? 
+					`Area A has €${incomeDiff.toLocaleString()} (${incomeDiffPercent}%) higher income` :
+					`Area B has €${Math.abs(incomeDiff).toLocaleString()} (${Math.abs(incomeDiffPercent)}%) higher income`;
+				comparisons.push(`<div class="comparison-item"><strong>Net Income:</strong> ${incomeComparison}</div>`);
+				
+				// Education comparison
+				const educationA = demographicA.educationBreakdown.tertiaryPercent;
+				const educationB = demographicB.educationBreakdown.tertiaryPercent;
+				const educationDiff = educationA - educationB;
+				const educationComparison = educationDiff > 0 ? 
+					`Area A has ${educationDiff.toFixed(1)}% more tertiary education` :
+					`Area B has ${Math.abs(educationDiff).toFixed(1)}% more tertiary education`;
+				comparisons.push(`<div class="comparison-item"><strong>Education:</strong> ${educationComparison}</div>`);
+				
+				// Population comparison
+				const popDiff = demographicA.totalPopulation - demographicB.totalPopulation;
+				const popComparison = popDiff > 0 ? 
+					`Area A has ${popDiff.toLocaleString()} more residents` :
+					`Area B has ${Math.abs(popDiff).toLocaleString()} more residents`;
+				comparisons.push(`<div class="comparison-item"><strong>Population:</strong> ${popComparison}</div>`);
+			}
+			
+			return `
+				<div style="padding: 16px;">
+					<h4 style="margin: 0 0 16px 0; color: #488E98;">Key Differences</h4>
+					${comparisons.join('')}
+					<div style="margin-top: 16px; padding: 12px; background: #f8f9fa; border-radius: 6px; font-size: 12px; color: #6b7280;">
+						<strong>Note:</strong> This comparison includes neighborhood demographics from census data. Some details may vary.
+					</div>
+				</div>
+			`;
+		}
+	</script>
+	<script src="app.js"></script>
+</body>
+</html>
